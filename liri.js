@@ -5,7 +5,7 @@
 // * movie-this
 // * do-what-it-says
 
-//these add other programs to this one
+
 var dataKeys = require("./keys.js");
 var fs = require('fs'); //file system
 var twitter = require('twitter');
@@ -25,17 +25,19 @@ var writeToLog = function(data) {
   });
 }
 
+//===============SPOTIFY===============
 //Creates a function for finding artist name from spotify
 var getArtistNames = function(artist) {
   return artist.name;
 };
 
-//Function for finding songs on Spotify
 var getMeSpotify = function(songName) {
   //If it doesn't find a song, find Cage the Elephant's Cigarette Daydreams
   if (songName === undefined) {
     songName = 'Cigarette Daydreams';
   };
+
+  // console.log(songName)
 
   spotify.search({ type: 'track', query: songName }, function(err, data) {
     if (err) {
@@ -43,8 +45,9 @@ var getMeSpotify = function(songName) {
       return;
     }
 
+    console.log(data.tracks.items);
     var songs = data.tracks.items;
-    var data = []; //empty array to hold data
+    var data = []; //empty array to hold song data
 
     for (var i = 0; i < songs.length; i++) {
       data.push({
@@ -54,21 +57,28 @@ var getMeSpotify = function(songName) {
         'album: ': songs[i].album.name,
       });
     }
-    console.log(data);
     writeToLog(data);
   });
 };
 
 
+//===============TWEETS===============
 var getTweets = function() {
-  var client = new twitter(dataKeys.twitterKeys);
-
-  var params = { screen_name: 'caitken7', count: 10 };
+  // var client = new twitter(dataKeys.twitterKeys);
+  var client = new twitter({
+  consumer_key: '5MkfkeGd3C2rkc9PiNAIjIZLz',
+  consumer_secret: 'DnxELqFedpGG0LqkhkTSpKy4qcjakyxsgVa7SvIWNCWaRROVrM',
+  access_token_key: '918914622421430273-mRkP625X2dRrqkGD8MsNmKo7Vb8s6E3',
+  access_token_secret: 's0NJsfozyzzSdRJBkbGOYj8ibtyfLyHaCL5YN6k4axRmq',
+    });
+  // console.log(client);
+  var params = { screen_name: 'caseyaitken7', count: 10 };
 
   client.get('statuses/user_timeline', params, function(error, tweets, response) {
 
+
     if (!error) {
-      var data = []; //empty array to hold data
+      var data = []; //empty array to hold Tweet data
       for (var i = 0; i < tweets.length; i++) {
         data.push({
             'created at: ' : tweets[i].created_at,
@@ -81,13 +91,15 @@ var getTweets = function() {
   });
 };
 
+
+//===============MOVIES===============
 var getMeMovie = function(movieName) {
 
   if (movieName === undefined) {
-    movieName = 'Mr Nobody';
+    movieName = 'Crank';
   }
 
-  var urlHit = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=full&tomatoes=true&r=json";
+  var urlHit = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=full&tomatoes=true&r=json&apikey=40e9cece";
 
   request(urlHit, function(error, response, body) {
     if (!error && response.statusCode == 200) {
@@ -113,6 +125,8 @@ var getMeMovie = function(movieName) {
 
 }
 
+
+//===============DO WHAT IT SAYS===============
 var doWhatItSays = function() {
   fs.readFile("random.txt", "utf8", function(error, data) {
     console.log(data);
@@ -128,7 +142,10 @@ var doWhatItSays = function() {
   });
 }
 
+
+//===============PICK FUNCTION===============
 var pick = function(caseData, functionData) {
+
   switch (caseData) {
     case 'my-tweets':
       getTweets();
